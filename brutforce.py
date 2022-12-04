@@ -1,3 +1,4 @@
+from itertools import combinations
 import os
 import csv
 
@@ -31,3 +32,34 @@ def get_csv_data(file):
         return formated_data
 
 
+def combinations(actions):
+    # customer price in cents (500€ * 100 cents)
+    max_price = 500 * 100
+
+    # sort actions list by benefit
+    actions_sorted_list = sorted(actions, key=lambda action: action[2], reverse=True)
+    
+    combinations_list = []
+
+    for action in actions_sorted_list:
+        if action[1] < max_price:
+            current_price = 0 if len(combinations_list) == 0 else sum([action[1] for action in combinations_list])
+
+            if max_price > current_price + action[1]:
+                combinations_list.append(action)
+    
+    return combinations_list
+
+
+if __name__ == "__main__":
+    actions = get_csv_data(csv_brutforce)
+    combo = combinations(actions)
+
+    for combination in combo:
+        print(combination)
+
+    total_price = sum([action[1] for action in combo]) / 100
+    total_rent = sum([action[2] for action in combo]) / 100
+
+    print(f"\nTotal price : {total_price}€")
+    print(f"Total rent : {total_rent}€")
