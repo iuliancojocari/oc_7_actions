@@ -1,10 +1,9 @@
-from itertools import combinations
 import os
 import csv
+from itertools import combinations
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-csv_brutforce = os.path.join(ROOT_DIR, "data\\brutforce.csv")
+csv_brutforce = os.path.join(ROOT_DIR, "data\\optimized.csv")
 
 def get_csv_data(file):
     """ Get data from csv file
@@ -18,48 +17,70 @@ def get_csv_data(file):
 
         for row in csv_reader:
             action_name = row[0]
-
+            
             # convert price from € to cents
-            price_in_cents = int(row[1]) * 100
+            price_in_cents = float(row[1]) * 100
 
             # calculate benefit in cents
-            benefit_in_percent = int(row[2]) / 100
-            benefit_in_cents = price_in_cents * benefit_in_percent
+            benefit_in_cents = float(row[2]) * 100
+            
 
             # create tuple for each row with formated data
-            formated_data.append((action_name, price_in_cents, int(benefit_in_cents)))
+            formated_data.append((action_name, int(price_in_cents), int(benefit_in_cents)))
 
         return formated_data
 
 
-def combinations(actions):
-    # customer price in cents (500€ * 100 cents)
-    max_price = 500 * 100
-
-    # sort actions list by benefit
-    actions_sorted_list = sorted(actions, key=lambda action: action[2], reverse=True)
+def generate_combinations(actions):
+    client_budget = 500 * 100
+    profit = 0
+    best_combination = []
     
-    combinations_list = []
+    for i in range(len(actions)):
+        list_combinations = combinations(actions, i+1)
 
-    for action in actions_sorted_list:
-        if action[1] < max_price:
-            current_price = 0 if len(combinations_list) == 0 else sum([action[1] for action in combinations_list])
+        for combination in list_combinations:
+            total_cost = calculate_cost(combination)
 
-            if max_price > current_price + action[1]:
-                combinations_list.append(action)
+            if total_cost <= client_budget:
+                total_profit = calculate_profit(combination)
+
+                if total_profit > profit:
+                    profit = total_profit
+
+                    best_combination = combination
+                    
+    return best_combination
+
+def calculate_profit(combination):
     
-    return combinations_list
+    profit = []
+
+    for action in combination:
+        profit.append(action[2])
+
+    return sum(profit)
+
+
+def calculate_cost(combination):
+    price = []
+
+    for action in combination:
+        price.append(action[1])
+
+    return sum(price)
+
+def display_result(best_combination):
+    print("Liste des actions achetées :\n")
+
+    for action in best_combination:
+        print(f"{action[0]} {action[1] / 100}€ {action[2] / 100}€")
+
+    print(f"\nSomme dépensée : {calculate_cost(best_combination) / 100}€")
+    print(f"Profit total : {calculate_profit(best_combination) / 100}€")
 
 
 if __name__ == "__main__":
     actions = get_csv_data(csv_brutforce)
-    combo = combinations(actions)
-
-    for combination in combo:
-        print(combination)
-
-    total_price = sum([action[1] for action in combo]) / 100
-    total_rent = sum([action[2] for action in combo]) / 100
-
-    print(f"\nTotal price : {total_price}€")
-    print(f"Total rent : {total_rent}€")
+    best_combination = generate_combinations(actions)
+    display_result(best_combination)
