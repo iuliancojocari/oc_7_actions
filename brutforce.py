@@ -2,15 +2,12 @@ import os
 import csv
 from itertools import combinations
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-csv_brutforce = os.path.join(ROOT_DIR, "data\\optimized.csv")
-
-def get_csv_data(file):
+def get_csv_data():
     """ Get data from csv file
-    @param file: file name
+
     @return: list of tuples
     """
-    with open(file, newline='') as csv_file:
+    with open("data\\brutforce.csv", newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         formated_data = []
         next(csv_reader)
@@ -81,7 +78,7 @@ def calculate_cost(combination):
 
 def display_result(best_combination):
     """ Display informations about the best combination
-    
+
     @param best_combination: list of stocks
     """
     print("Liste des actions achetées :\n")
@@ -94,6 +91,6 @@ def display_result(best_combination):
 
 
 if __name__ == "__main__":
-    stocks = get_csv_data(csv_brutforce)
+    stocks = get_csv_data()
     best_combination = generate_combinations(stocks)
     display_result(best_combination)
